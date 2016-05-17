@@ -24,8 +24,6 @@ Background: movies have been added to database
 Scenario: sort movies alphabetically
   When I follow "Movie Title"
   # your steps here
-  Then I should see "hello" before "there"
-  Then I should see "hi" before "this"
   
 
 Scenario: sort movies in increasing order of release date
