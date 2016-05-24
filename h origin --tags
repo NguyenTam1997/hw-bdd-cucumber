@@ -1,0 +1,160 @@
+[1mdiff --git a/rottenpotatoes/app/controllers/movies_controller.rb b/rottenpotatoes/app/controllers/movies_controller.rb[m
+[1mindex 497a757..0b99683 100644[m
+[1m--- a/rottenpotatoes/app/controllers/movies_controller.rb[m
+[1m+++ b/rottenpotatoes/app/controllers/movies_controller.rb[m
+[36m@@ -57,4 +57,4 @@[m [mclass MoviesController < ApplicationController[m
+     redirect_to movies_path[m
+   end[m
+ [m
+[31m-end[m
+[32m+[m[32mend[m
+\ No newline at end of file[m
+[1mdiff --git a/rottenpotatoes/features/filter_movie_list.feature b/rottenpotatoes/features/filter_movie_list.feature[m
+[1mindex ac6a148..16ff549 100644[m
+[1m--- a/rottenpotatoes/features/filter_movie_list.feature[m
+[1m+++ b/rottenpotatoes/features/filter_movie_list.feature[m
+[36m@@ -1,3 +1,5 @@[m
+[32m+[m[32m# bundle exec cucumber features/filter_movie_list.feature:49[m
+[32m+[m
+ Feature: display list of movies filtered by MPAA rating[m
+  [m
+   As a concerned parent[m
+[36m@@ -22,11 +24,32 @@[m [mBackground: movies have been added to database[m
+   And  I am on the RottenPotatoes home page[m
+ [m
+ Scenario: restrict to movies with 'PG' or 'R' ratings[m
+[32m+[m[32m  # Use existing step definitions in web_steps.rb[m
+[32m+[m
+   # enter step(s) to check the 'PG' and 'R' checkboxes[m
+[32m+[m[32m  When I check the following ratings: PG, R[m
+[32m+[m
+   # enter step(s) to uncheck all other checkboxes[m
+[32m+[m[32m  And I uncheck the following ratings: PG-13, G[m
+[32m+[m
+   # enter step to "submit" the search form on the homepage[m
+[32m+[m[32m  And I press "Refresh"[m
+[32m+[m
+   # enter step(s) to ensure that PG and R movies are visible[m
+[32m+[m[32m  Then I should see "The Terminator"[m
+[32m+[m[32m  And I should see "When Harry Met Sally"[m
+[32m+[m[32m  And I should see "The Incredibles"[m
+[32m+[m[32m  And I should see "Raiders of the Lost Ark"[m
+[32m+[m
+   # enter step(s) to ensure that other movies are not visible[m
+[32m+[m[32m  And I should not see "Aladdin"[m
+[32m+[m[32m  And I should not see "The Help"[m
+[32m+[m[32m  And I should not see "Chocolat"[m
+[32m+[m[32m  And I should not see "2001: A Space Odyssey"[m
+[32m+[m[32m  And I should not see "Chicken Run"[m
+ [m
+ Scenario: all ratings selected[m
+   # see assignment[m
+[32m+[m[32m  When I check the following ratings: PG, R, PG-13, G[m
+[32m+[m[32m  And I press "Refresh"[m
+[32m+[m[32m  Then I should see all the movies[m
+\ No newline at end of file[m
+[1mdiff --git a/rottenpotatoes/features/sort_movie_list.feature b/rottenpotatoes/features/sort_movie_list.feature[m
+[1mindex 00a486f..43ccbc8 100644[m
+[1m--- a/rottenpotatoes/features/sort_movie_list.feature[m
+[1m+++ b/rottenpotatoes/features/sort_movie_list.feature[m
+[36m@@ -23,9 +23,9 @@[m [mBackground: movies have been added to database[m
+ [m
+ Scenario: sort movies alphabetically[m
+   When I follow "Movie Title"[m
+[31m-  # your steps here[m
+[31m-  [m
+[32m+[m[32m  Then I should see "Chocolat" before "The Terminator"[m
+[32m+[m[32m  And I should see "Amelie" before "Chocolat"[m
+ [m
+ Scenario: sort movies in increasing order of release date[m
+   When I follow "Release Date"[m
+[31m-  # your steps here[m
+[32m+[m[32m  Then I should see "Aladdin" before "Amelie"[m
+\ No newline at end of file[m
+[1mdiff --git a/rottenpotatoes/features/step_definitions/movie_steps.rb b/rottenpotatoes/features/step_definitions/movie_steps.rb[m
+[1mindex 39ec2bc..7277251 100644[m
+[1m--- a/rottenpotatoes/features/step_definitions/movie_steps.rb[m
+[1m+++ b/rottenpotatoes/features/step_definitions/movie_steps.rb[m
+[36m@@ -1,23 +1,24 @@[m
+[31m-# Add a declarative step here for populating the DB with movies.[m
+[32m+[m[32m## Add a declarative step here for populating the DB with movies.[m
+ [m
+ Given /the following movies exist/ do |movies_table|[m
+   movies_table.hashes.each do |movie|[m
+[31m-    #debugger[m
+[31m-    Movie.create!(movie)[m
+     # each returned element will be a hash whose key is the table header.[m
+     # you should arrange to add that movie to the database here.[m
+[32m+[m[32m    # {"title"=>"Aladdin", "rating"=>"G", "release_date"=>"25-Nov-1992"}[m
+[32m+[m[32m    Movie.create(movie)[m
+   end[m
+[31m-  flunk "Unimplemented"[m
+[32m+[m[32m  #flunk "Unimplemented"[m
+ end[m
+ [m
+[31m-[m
+ # Make sure that one string (regexp) occurs before or after another one[m
+ #   on the same page[m
+ [m
+ Then /I should see "(.*)" before "(.*)"/ do |e1, e2|[m
+[31m-  assert page.body =~ #{e1}.+#{e2}/m[m
+   #  ensure that that e1 occurs before e2.[m
+   #  page.body is the entire content of the page as a string.[m
+[32m+[m[41m  [m
+[32m+[m[32m  regexp = /#{e1}.*#{e2}/m  #m make dot match newlines[m
+[32m+[m[32m  expect(page.body).to match(regexp)[m
+ end[m
+ [m
+ # Make it easier to express checking or unchecking several boxes at once[m
+[36m@@ -25,22 +26,26 @@[m [mend[m
+ #  "When I check the following ratings: G"[m
+ [m
+ When /I (un)?check the following ratings: (.*)/ do |uncheck, rating_list|[m
+[31m-  if uncheck == "um"[m
+[31m-    rating_list.split(', ').each {|x| step %{I uncheck "rating_#{x}"}}[m
+[31m-  else[m
+[31m-     rating_list.split(', ').each {|x| step %{I check "rating_#{x}"}}[m
+[31m-   end[m
+   # HINT: use String#split to split up the rating_list, then[m
+   #   iterate over the ratings and reuse the "When I check..." or[m
+   #   "When I uncheck..." steps in lines 89-95 of web_steps.rb[m
+[32m+[m[32m  # rating_list = "PG, R"[m
+[32m+[m[32m  # uncheck = nil or "un"[m
+[32m+[m
+[32m+[m[32m  rating_list.split(/,\s*/).each { |rating|  # , one or more spaces characters[m
+[32m+[m[32m    if uncheck[m
+[32m+[m[32m      uncheck "ratings_#{rating}" # checkboxes id = ratings_G[m
+[32m+[m[32m    else[m
+[32m+[m[32m      check "ratings_#{rating}"[m
+[32m+[m[32m    end[m
+[32m+[m[32m  }[m
+ end[m
+ [m
+[31m-Then /I should see all the movies/ do[m
+[31m-  rows = page.all('#movie tr').size - 1[m
+[31m-  assert rows == 0[m
+[31m-end[m
+[31m-[m
+[31m-Then /I should see all the movies/ do[m
+[31m-  rows = page.all('#movie tr').size - 1[m
+[31m-  assert rows == Movie.count()[m
+[32m+[m[32mThen /I should see all the movies/ do[m[41m [m
+[32m+[m[32m  # Make sure that all the movies in the app are visible in the table[m[41m [m
+[32m+[m[32m  # have_css if from capybara[m
+[32m+[m[32m  # expect is from rspec[m
+[32m+[m[32m  # have_css with rpsec matcher == has_css capybara matcher[m
+[32m+[m[32m  expect(page).to have_css("table#movies tbody tr", count: Movie.count)[m
+[32m+[m[32m  #flunk "Unimplemented"[m
+ end[m
+\ No newline at end of file[m
+[1mdiff --git a/rottenpotatoes/log/development.log b/rottenpotatoes/log/development.log[m
+[1mindex f00df2b..fe5d337 100644[m
+[1m--- a/rottenpotatoes/log/development.log[m
+[1m+++ b/rottenpotatoes/log/development.log[m
+[36m@@ -502,3 +502,6 @@[m [mStarted GET "/assets/application.self.js?body=1" for ::1 at 2015-07-23 13:57:16[m
+   [1m[36m (0.2ms)[0m  [1mSELECT version FROM "schema_migrations"[0m[m
+   [1m[35m (10.0ms)[0m  INSERT INTO "schema_migrations" (version) VALUES ('20120130161449')[m
+   [1m[36m (10.5ms)[0m  [1mINSERT INTO "schema_migrations" (version) VALUES ('20111119180638')[0m[m
+[32m+[m
+[32m+[m
+[32m+[m[32mStarted GET "/assets/rails.png" for 117.5.84.139 at 2016-05-24 02:21:24 +0000[m
